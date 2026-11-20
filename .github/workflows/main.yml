@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Standalone Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -37,34 +37,26 @@ jobs:
           npm_config_fetch_retry_mintimeout: 20000
           npm_config_fetch_retry_maxtimeout: 120000
 
-      - name: Fix Expo dependencies
+      - name: Check Expo dependencies
         run: npx expo install --fix
 
-      - name: Generate Android project
-        run: npx expo prebuild --platform android --non-interactive
+      - name: Generate clean Android project
+        run: npx expo prebuild --platform android --clean --non-interactive
 
-      - name: Diagnose Expo module configuration
-        run: |
-          npx expo-modules-autolinking resolve --platform android --json > autolinking.json
-
-          node -e "
-          const c = require('./autolinking.json');
-          console.log('TOTAL MODULES:', c.modules?.length);
-          console.log('MODULE AT INDEX 8:');
-          console.log(JSON.stringify(c.modules?.[8], null, 2));
-          console.log('ALL MODULE NAMES:');
-          console.log(c.modules?.map((m, i) => i + ': ' + m.packageName).join('\n'));
-          "
-
-      - name: Build APK
+      - name: Build standalone release APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleRelease --stacktrace
 
-      - name: Upload APK
+      - name: Find generated APK
+        run: |
+          echo "Checking generated release APK..."
+          find android/app/build/outputs/apk/release -type f -name "*.apk"
+
+      - name: Upload standalone APK
         uses: actions/upload-artifact@v4
         with:
-          name: offline-connect-pro-android
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: offline-connect-pro-standalone-android
+          path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
