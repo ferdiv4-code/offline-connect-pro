@@ -45,8 +45,16 @@ jobs:
 
       - name: Diagnose Expo module configuration
         run: |
-          npx expo-modules-autolinking resolve --platform android > autolinking.json
-          node -e "const c=require('./autolinking.json'); console.log('TOTAL MODULES:',c.modules?.length); console.log('MODULE AT INDEX 8:'); console.log(JSON.stringify(c.modules?.[8],null,2)); console.log('ALL MODULE NAMES:'); console.log(c.modules?.map((m,i)=>i+': '+(m.packageName || m.name)).join('\n'))"
+          npx expo-modules-autolinking resolve --platform android --json > autolinking.json
+
+          node -e "
+          const c = require('./autolinking.json');
+          console.log('TOTAL MODULES:', c.modules?.length);
+          console.log('MODULE AT INDEX 8:');
+          console.log(JSON.stringify(c.modules?.[8], null, 2));
+          console.log('ALL MODULE NAMES:');
+          console.log(c.modules?.map((m, i) => i + ': ' + m.packageName).join('\n'));
+          "
 
       - name: Build APK
         run: |
