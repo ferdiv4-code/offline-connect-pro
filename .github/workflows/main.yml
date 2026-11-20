@@ -11,13 +11,12 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
-          package-manager-cache: false
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -30,9 +29,6 @@ jobs:
 
       - name: Clear npm cache
         run: npm cache clean --force
-
-      - name: Check Babel package registry
-        run: npm view @babel/plugin-transform-block-scoping@7.29.13 dist.tarball --registry=https://registry.npmjs.org/
 
       - name: Install dependencies
         run: npm install --prefer-online --registry=https://registry.npmjs.org/
@@ -50,7 +46,7 @@ jobs:
       - name: Diagnose Expo module configuration
         run: |
           npx expo-modules-autolinking resolve --platform android > autolinking.json
-          node -e "const c=require('./autolinking.json'); console.log('TOTAL MODULES:',c.modules?.length); console.log('MODULE AT INDEX 8:'); console.log(JSON.stringify(c.modules?.[8],null,2)); console.log('ALL MODULE NAMES:'); console.log(c.modules?.map((m,i)=>i+': '+(m.packageName || m.name || m.name)).join('\n'))"
+          node -e "const c=require('./autolinking.json'); console.log('TOTAL MODULES:',c.modules?.length); console.log('MODULE AT INDEX 8:'); console.log(JSON.stringify(c.modules?.[8],null,2)); console.log('ALL MODULE NAMES:'); console.log(c.modules?.map((m,i)=>i+': '+(m.packageName || m.name)).join('\n'))"
 
       - name: Build APK
         run: |
