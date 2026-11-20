@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Offline Connect Pro",
+    "slug": "offline-connect-pro",
+    "scheme": "offlineconnectpro",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.offlineconnectpro.app",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "Offline Connect Pro discovers nearby phones and exchanges messages, files and calls over your local Wi-Fi network.",
+        "NSBonjourServices": [
+          "_ocpro._tcp"
+        ],
+        "NSCameraUsageDescription": "Camera access is used for local video calls.",
+        "NSMicrophoneUsageDescription": "Microphone access is used for local voice and video calls."
+      }
+    },
+    "android": {
+      "package": "com.offlineconnectpro.app",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_WIFI_STATE",
+        "CHANGE_WIFI_MULTICAST_STATE",
+        "RECORD_AUDIO",
+        "CAMERA",
+        "MODIFY_AUDIO_SETTINGS",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#07130F"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-document-picker",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermission": "Allow Offline Connect Pro to use the camera during local video calls.",
+          "microphonePermission": "Allow Offline Connect Pro to use the microphone during local calls."
+        }
+      ]
+    ]
+  }
+}
