@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          package-manager-cache: false
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -27,8 +28,18 @@ jobs:
       - name: Accept Android SDK licences
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
 
+      - name: Clear npm cache
+        run: npm cache clean --force
+
+      - name: Check Babel package registry
+        run: npm view @babel/plugin-transform-block-scoping@7.29.13 dist.tarball --registry=https://registry.npmjs.org/
+
       - name: Install dependencies
-        run: npm install
+        run: npm install --prefer-online --registry=https://registry.npmjs.org/
+        env:
+          npm_config_fetch_retries: 5
+          npm_config_fetch_retry_mintimeout: 20000
+          npm_config_fetch_retry_maxtimeout: 120000
 
       - name: Fix Expo dependencies
         run: npx expo install --fix
