@@ -338,7 +338,7 @@ class LanNetwork {
 
   private startDiscovery() {
     try {
-      const socket = dgram.createSocket('udp4');
+      const socket = dgram.createSocket({ type: 'udp4' }) as any;
 
       this.discovery = socket;
       this.discoveryBound = false;
@@ -466,7 +466,7 @@ class LanNetwork {
     if (this.discovery) return;
 
     try {
-      const socket = dgram.createSocket('udp4');
+      const socket = dgram.createSocket({ type: 'udp4' }) as any;
 
       this.discovery = socket;
       this.discoveryBound = false;

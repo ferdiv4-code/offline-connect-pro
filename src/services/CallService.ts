@@ -30,9 +30,9 @@ class CallService {
     this.local=await mediaDevices.getUserMedia({audio:true,video:kind==='video'?{facingMode:'user',width:640,height:480,frameRate:24}:false});
     this.pc=new RTCPeerConnection(config);
     this.local.getTracks().forEach((t:any)=>this.pc!.addTrack(t,this.local));
-    this.pc.ontrack=(e:any)=>{this.remote=e.streams?.[0];this.onChange({status:'connected',...this.current,remote:this.remote,local:this.local});};
-    this.pc.onicecandidate=(e:any)=>{if(e.candidate&&this.current)lanNetwork.send({type:'signal',to:this.current.peerId,signal:{type:'candidate',candidate:e.candidate}});};
-    this.pc.onconnectionstatechange=()=>this.onChange({status:this.pc?.connectionState,...this.current,local:this.local,remote:this.remote});
+    (this.pc as any).ontrack=(e:any)=>{this.remote=e.streams?.[0];this.onChange({status:'connected',...this.current,remote:this.remote,local:this.local});};
+    (this.pc as any).onicecandidate=(e:any)=>{if(e.candidate&&this.current)lanNetwork.send({type:'signal',to:this.current.peerId,signal:{type:'candidate',candidate:e.candidate}});};
+    (this.pc as any).onconnectionstatechange=()=>this.onChange({status:this.pc?.connectionState,...this.current,local:this.local,remote:this.remote});
   }
   async handleSignal(from:string,signal:any,peerName='Nearby user'){
     if(signal.type==='offer'){
