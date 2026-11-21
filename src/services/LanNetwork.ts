@@ -29,6 +29,7 @@ class LanNetwork {
   private self: any = null;
   private hostAddress = '';
   private roomCode = '';
+  private localIp = '';
 
   private active = false;
   private discoveryBound = false;
@@ -81,7 +82,8 @@ class LanNetwork {
 
   private attach(s: any, onPacket: (p: WirePacket) => void) {
     s.on('data', (chunk: any) => {
-      let all = (this.bufferMap.get(s as any) || '') +
+      const all =
+        (this.bufferMap.get(s as any) || '') +
         Buffer.from(chunk).toString('utf8');
 
       const lines = all.split('\n');
@@ -123,7 +125,8 @@ class LanNetwork {
 
       this.emit({
         type: 'error',
-        message: 'Local network discovery is unavailable. You can still connect using an IP address.'
+        message:
+          'Local network discovery is unavailable. You can still connect using an IP address.'
       });
     });
 
@@ -137,8 +140,7 @@ class LanNetwork {
   private sendUdp(data: any, port: number, address: string) {
     const socket = this.discovery;
 
-    // IMPORTANT:
-    // Never send data before UDP bind has completed.
+    // Never send UDP data before binding has completed.
     if (!socket || !this.discoveryBound) {
       return;
     }
@@ -160,6 +162,55 @@ class LanNetwork {
     }
   }
 
+  // Returns the general broadcast address and, where possible,
+  // the typical /24 subnet broadcast address.
+  private getBroadcastAddresses(ip?: string): string[] {
+    const addresses = new Set<string>([
+      '255.255.255.255'
+    ]);
+
+    if (
+      !ip ||
+      ip === '0.0.0.0' ||
+      ip === '127.0.0.1'
+    ) {
+      return [...addresses];
+    }
+
+    const parts = ip.split('.').map(Number);
+
+    const validIp =
+      parts.length === 4 &&
+      parts.every(
+        n =>
+          Number.isInteger(n) &&
+          n >= 0 &&
+          n <= 255
+      );
+
+    if (
+      validIp &&
+      parts[0] !== 127 &&
+      parts[0] !== 169
+    ) {
+      addresses.add(
+        `${parts[0]}.${parts[1]}.${parts[2]}.255`
+      );
+    }
+
+    return [...addresses];
+  }
+
+  private sendDiscoveryBroadcast(data: any) {
+    const addresses = this.getBroadcastAddresses(
+      this.localIp
+    );
+
+    for (const address of addresses) {
+      this.sendUdp(data, UDP_PORT, address);
+    }
+  }
+
   async hostRoom(info: {
     id: string;
     hostId: string;
@@ -174,6 +225,7 @@ class LanNetwork {
 
     this.self = info;
     this.roomCode = info.code;
+    this.localIp = info.hostIp || '';
     this.active = true;
 
     this.server = TcpSocket.createServer((s: any) => {
@@ -258,9 +310,14 @@ class LanNetwork {
           ) {
             if (p.to) {
               if (p.to === this.self?.hostId) {
-                this.emit({ ...p, from: peerId });
+                this.emit({
+                  ...p,
+                  from: peerId
+                });
               } else {
-                const target = this.clients.get(String(p.to));
+                const target = this.clients.get(
+                  String(p.to)
+                );
 
                 if (target) {
                   this.sendSocket(target, {
@@ -271,11 +328,17 @@ class LanNetwork {
               }
             } else {
               this.broadcast(
-                { ...p, from: peerId },
+                {
+                  ...p,
+                  from: peerId
+                },
                 s
               );
 
-              this.emit({ ...p, from: peerId });
+              this.emit({
+                ...p,
+                from: peerId
+              });
             }
           }
         }
@@ -338,7 +401,9 @@ class LanNetwork {
 
   private startDiscovery() {
     try {
-      const socket = dgram.createSocket({ type: 'udp4' }) as any;
+      const socket = dgram.createSocket({
+        type: 'udp4'
+      }) as any;
 
       this.discovery = socket;
       this.discoveryBound = false;
@@ -358,13 +423,16 @@ class LanNetwork {
             name: this.self.displayName,
             host: this.self.name,
             port: TCP_PORT,
-            code: this.self.isPrivate ? '' : this.roomCode,
+            code: this.self.isPrivate
+              ? ''
+              : this.roomCode,
             roomName: this.self.name,
             maxMembers: this.self.maxMembers,
             isPrivate: this.self.isPrivate,
             members: this.clients.size + 1
           };
 
+          // Reply directly to the device that requested discovery.
           this.sendUdp(
             Buffer.from(JSON.stringify(response)),
             rinfo.port,
@@ -399,7 +467,7 @@ class LanNetwork {
         }
       });
 
-      // Wait until binding finishes before broadcasting.
+      // Wait for bind before sending discovery messages.
       socket.bind(UDP_PORT, () => {
         if (this.discovery !== socket) return;
 
@@ -418,7 +486,8 @@ class LanNetwork {
 
       this.emit({
         type: 'error',
-        message: 'Room hosting started, but automatic discovery could not start. Share the host IP and room code.'
+        message:
+          'Room hosting started, but automatic discovery could not start. Share the host IP and room code.'
       });
     }
   }
@@ -439,17 +508,17 @@ class LanNetwork {
       name: this.self.displayName,
       host: this.self.name,
       port: TCP_PORT,
-      code: this.self.isPrivate ? '' : this.roomCode,
+      code: this.self.isPrivate
+        ? ''
+        : this.roomCode,
       roomName: this.self.name,
       maxMembers: this.self.maxMembers,
       isPrivate: this.self.isPrivate,
       members: this.clients.size + 1
     };
 
-    this.sendUdp(
-      Buffer.from(JSON.stringify(payload)),
-      UDP_PORT,
-      '255.255.255.255'
+    this.sendDiscoveryBroadcast(
+      Buffer.from(JSON.stringify(payload))
     );
 
     if (this.discoveryTimer) {
@@ -462,11 +531,15 @@ class LanNetwork {
     );
   }
 
-  async discover() {
+  async discover(localIp = '') {
     if (this.discovery) return;
 
+    this.localIp = localIp;
+
     try {
-      const socket = dgram.createSocket({ type: 'udp4' }) as any;
+      const socket = dgram.createSocket({
+        type: 'udp4'
+      }) as any;
 
       this.discovery = socket;
       this.discoveryBound = false;
@@ -514,10 +587,8 @@ class LanNetwork {
           console.warn('UDP broadcast setup failed:', e);
         }
 
-        this.sendUdp(
-          Buffer.from(BEACON),
-          UDP_PORT,
-          '255.255.255.255'
+        this.sendDiscoveryBroadcast(
+          Buffer.from(BEACON)
         );
 
         this.repeatDiscovery();
@@ -527,7 +598,8 @@ class LanNetwork {
 
       this.emit({
         type: 'error',
-        message: 'Automatic discovery is unavailable on this network. Use Join by IP instead.'
+        message:
+          'Automatic discovery is unavailable on this network. Use Join by IP instead.'
       });
     }
   }
@@ -540,10 +612,8 @@ class LanNetwork {
       return;
     }
 
-    this.sendUdp(
-      Buffer.from(BEACON),
-      UDP_PORT,
-      '255.255.255.255'
+    this.sendDiscoveryBroadcast(
+      Buffer.from(BEACON)
     );
 
     if (this.discoveryTimer) {
@@ -601,7 +671,8 @@ class LanNetwork {
             } else if (p.type === 'rejected') {
               finishReject(
                 new Error(
-                  p.reason || 'Room rejected the connection'
+                  p.reason ||
+                  'Room rejected the connection'
                 )
               );
 
@@ -623,7 +694,8 @@ class LanNetwork {
       s.once('error', (e: any) => {
         finishReject(
           new Error(
-            e?.message || 'Could not connect to room host'
+            e?.message ||
+            'Could not connect to room host'
           )
         );
       });
@@ -644,7 +716,9 @@ class LanNetwork {
             from: this.self?.id
           });
         } else {
-          const target = this.clients.get(String(p.to));
+          const target = this.clients.get(
+            String(p.to)
+          );
 
           if (target) {
             this.sendSocket(target, {
