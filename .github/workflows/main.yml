@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build Standalone Android APK
+    name: Check and Build Standalone Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -40,6 +40,9 @@ jobs:
       - name: Check Expo dependencies
         run: npx expo install --fix
 
+      - name: Check TypeScript
+        run: npx tsc --noEmit
+
       - name: Generate clean Android project
         run: npx expo prebuild --platform android --clean --non-interactive
 
@@ -60,3 +63,4 @@ jobs:
           name: offline-connect-pro-standalone-android
           path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
+
