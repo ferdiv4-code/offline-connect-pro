@@ -1,59 +1,42 @@
-# Offline Connect Pro 2.0
+# Offline Connect Pro — 2.4.4.0
 
-A local-network communication app source project for Android and iOS. It is designed to run on the same Wi-Fi network or a phone hotspot without a cloud account or internet service.
+Offline Connect Pro is a local-network communication app. The existing project includes room hosting/joining, nearby discovery, private and group chat, small file sharing, and one-to-one WebRTC calls.
 
-## Included in this source build
-- Expo Router mobile app with Home, Chats, Rooms, Calls and Settings.
-- Local SQLite persistence for conversations and messages.
-- TCP room host/client messaging transport on the Wi-Fi interface.
-- UDP LAN broadcast room discovery with manual host-IP fallback and host IP display.
-- Room codes, private-room gate, room capacity setting and member events.
-- Local file attachment transfer encoded over the room connection (small files only).
-- WebRTC one-to-one audio/video call implementation with local-only ICE configuration.
-- Profile, theme and local settings from the original scaffold.
+## Version 2.4.4.0 focus
+This update focuses on the voice-call problem:
+- Fixes the room-host sender ID used when routing a call to another room member.
+- Processes call signals from the always-running network provider, reducing the chance of losing early ICE candidates while opening the call screen.
+- Queues remote ICE candidates until WebRTC is ready to apply them.
+- Adds a visible incoming-call screen with vibration alert, accept/decline controls, call status, and microphone mute.
+- Ensures direct calls use the other member's ID, not the local conversation ID.
+- Uses the supplied artwork as the app icon and adds a short animated startup screen.
 
-## Important build facts
-This app uses native modules (`react-native-tcp-socket`, `react-native-udp`, `react-native-webrtc`). It **cannot run in Expo Go**. It needs a native development build generated with Expo prebuild/EAS Build. iOS compilation and signing require macOS/Xcode or a compatible cloud build environment. This source archive is not an APK or IPA.
+Video calling remains present but is not the focus of this version.
 
-## Install / build
-Use Node.js 22.13+ for Expo SDK 57. The project uses the SDK 57-compatible React Native and Expo package line.
+## Build an Android APK with GitHub Actions
+1. Download and extract the ZIP, then open the extracted `offline-connect-pro-main` folder.
+2. Upload the contents of that folder to the root of your GitHub repository (not the containing folder itself).
+3. Commit the changes to the `main` branch.
+4. In GitHub, open **Actions**.
+5. Select **Build Android APK** in the left panel.
+6. Tap **Run workflow**, select `main`, and run it.
+7. Wait for the workflow to finish. If it succeeds, open the run and download the `offline-connect-pro-android-debug` artifact.
+8. Extract the artifact ZIP to get the APK and install it on both test phones.
 
-```bash
-npm install
-npx expo install --fix
-npx expo prebuild
-```
+The workflow installs dependencies, aligns Expo packages, runs TypeScript validation, generates the Android project, and builds a debug APK.
 
-Android debug build from a computer with Android SDK/JDK configured:
-```bash
-npx expo run:android
-```
+## Test voice calling
+1. Install the same APK on two Android phones.
+2. Connect both to the same central Wi-Fi router.
+3. Turn mobile data off on both phones.
+4. Open Offline Connect Pro on both and join the same room (the host creates the room; the other phone joins it).
+5. Open a private chat between the two members and place an audio call.
+6. Accept the incoming call and verify that both phones can hear each other.
+7. Keep the call active for at least 10 minutes, then repeat with one phone hosting a hotspot and the other joining it.
 
-For a cloud Android preview build:
-```bash
-npx eas-cli build --platform android --profile preview
-```
-EAS may have free-tier limits and requires an Expo account. Do not assume unlimited free builds.
+The app needs a local network path between the phones. The current call relay requires both devices to be members of the same room session. A central router is the recommended first test. Hotspot behavior can vary by Android manufacturer and hotspot isolation settings.
 
-## How to use
-1. Install the same native build on the phones.
-2. Connect phones to the same Wi-Fi network, or connect other phones to the host phone's hotspot.
-3. On one phone, choose Create Room and keep the app open.
-4. On other phones, choose the discovered room. If it is not found, enter the host phone's local IP address and room code.
-5. Open the room chat to exchange messages and small files.
-6. Start an audio/video call from a conversation header.
-
-## Network limitations
-- The Wi-Fi access point must permit client-to-client traffic. Guest networks and client isolation can block all peer communication.
-- Hotspot behavior differs by Android manufacturer. Some hotspots block UDP broadcast or client-to-client traffic.
-- iOS local-network permissions must be granted. iOS UDP broadcast discovery may require Apple’s Multicast Networking entitlement; without it, use the displayed host IP and manual join. iOS background execution rules are stricter than Android.
-- For a first build, keep the host app in the foreground.
-- WebRTC uses no public STUN/TURN servers here; therefore direct local ICE connectivity is required. Some network combinations will fail to establish calls.
-- Group text chat is supported. This delivery includes one-to-one voice/video calling; multi-person group voice/video calling is not implemented yet. Large group video calls would require a local media-forwarding service (SFU).
-- File sharing is intended for small files; the chat transport sends file bytes in a base64 JSON packet and has a conservative size limit.
-
-## Security note
-Room codes are a basic join gate, not end-to-end encryption. Do not use this first build for sensitive or confidential communication. Add authenticated encryption and stronger peer identity verification before public release.
-
-## Status
-This is a substantial source implementation, not a device-certified release. It has not been compiled or tested on physical Android/iOS devices in this environment. The first real build may reveal native dependency or device-network compatibility fixes.
+## Important limitations
+- A complete Android build and physical two-phone call test were not possible in the preparation environment because npm dependency installation timed out.
+- The code is prepared for GitHub Actions validation, but a successful CI build and real-device test are still required before calling this release error-free.
+- Video calling, background calls, multi-person calls, and app-store release signing are not certified by this update.

@@ -1,6 +1,6 @@
-# Build an Android APK without a paid coding platform
+# Build Offline Connect Pro 2.4.4.0 on GitHub Actions
 
-The project includes `.github/workflows/build-android.yml` so GitHub Actions can generate a signed-for-testing Android debug APK on a free public repository.
+The project includes `.github/workflows/build-android.yml` so GitHub Actions can validate TypeScript, generate the Android project, and build an Android debug APK for testing. Version: `2.4.4.0` (Android version code `2440`).
 
 1. Create a GitHub account if you do not already have one.
 2. Create a **public** repository named `offline-connect-pro`.

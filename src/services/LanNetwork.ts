@@ -312,7 +312,8 @@ class LanNetwork {
               if (p.to === this.self?.hostId) {
                 this.emit({
                   ...p,
-                  from: peerId
+                  from: peerId,
+                  fromName: this.clientNames.get(peerId) || p.fromName || 'Nearby user'
                 });
               } else {
                 const target = this.clients.get(
@@ -322,7 +323,16 @@ class LanNetwork {
                 if (target) {
                   this.sendSocket(target, {
                     ...p,
-                    from: peerId
+                    from: peerId,
+                    fromName: this.clientNames.get(peerId) || p.fromName || 'Nearby user'
+                  });
+                } else {
+                  this.sendSocket(s, {
+                    type: 'signal',
+                    to: peerId,
+                    from: this.self?.hostId,
+                    fromName: this.self?.displayName || 'Room host',
+                    signal: { type: 'reject', reason: 'That member is no longer connected to the room.' }
                   });
                 }
               }
@@ -337,7 +347,8 @@ class LanNetwork {
 
               this.emit({
                 ...p,
-                from: peerId
+                from: peerId,
+                fromName: this.clientNames.get(peerId) || p.fromName || 'Nearby user'
               });
             }
           }
@@ -713,26 +724,30 @@ class LanNetwork {
         if (p.to === this.self?.hostId) {
           this.emit({
             ...p,
-            from: this.self?.id
+            from: this.self?.hostId,
+            fromName: this.self?.displayName || 'Room host'
           });
         } else {
           const target = this.clients.get(
             String(p.to)
           );
 
-          if (target) {
-            this.sendSocket(target, {
-              ...p,
-              from: this.self?.id
-            });
+          if (!target) {
+            throw new Error('That member is no longer connected to the room.');
           }
+          this.sendSocket(target, {
+            ...p,
+            from: this.self?.hostId,
+            fromName: this.self?.displayName || 'Room host'
+          });
         }
       } else {
         this.broadcast(p);
 
         this.emit({
           ...p,
-          from: this.self?.id
+          from: this.self?.hostId,
+          fromName: this.self?.displayName || 'Room host'
         });
       }
 

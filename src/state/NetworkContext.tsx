@@ -20,6 +20,7 @@ import type {
 
 import { useApp } from './AppContext';
 import { saveMessage } from '@/database/database';
+import { callService } from '@/services/CallService';
 
 type Ctx = {
   status: NetworkStatus;
@@ -126,21 +127,27 @@ export function NetworkProvider({
         }
       }
 
-      if (
-        p.type === 'signal' &&
-        p.signal?.type === 'offer' &&
-        p.to === profile.id
-      ) {
-        router.push({
-          pathname: '/call/[id]',
-          params: {
-            id: p.from,
-            title: p.fromName || 'Nearby user',
-            kind: p.signal.kind || 'audio',
-            incoming: '1',
-            offer: JSON.stringify(p.signal)
-          }
-        });
+      if (p.type === 'signal' && p.to === profile.id) {
+        // Keep call signalling in the always-mounted network provider. This
+        // prevents early ICE candidates being lost while the call screen mounts.
+        callService.handleSignal(
+          String(p.from || ''),
+          p.signal,
+          p.fromName || 'Nearby user'
+        ).catch(error => console.warn('Incoming call signal failed:', error));
+
+        if (p.signal?.type === 'offer') {
+          router.push({
+            pathname: '/call/[id]',
+            params: {
+              id: String(p.from || ''),
+              title: p.fromName || 'Nearby user',
+              kind: p.signal.kind || 'audio',
+              incoming: '1',
+              offer: JSON.stringify(p.signal)
+            }
+          });
+        }
       }
 
       if (p.type === 'error') {

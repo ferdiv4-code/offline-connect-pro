@@ -3,7 +3,7 @@
     "name": "Offline Connect Pro",
     "slug": "offline-connect-pro",
     "scheme": "offlineconnectpro",
-    "version": "2.0.0",
+    "version": "2.4.4.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -30,11 +30,15 @@
         "CAMERA",
         "MODIFY_AUDIO_SETTINGS",
         "READ_MEDIA_IMAGES",
-        "READ_MEDIA_VIDEO"
+        "READ_MEDIA_VIDEO",
+        "WAKE_LOCK",
+        "VIBRATE"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#07130F"
-      }
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#06182A"
+      },
+      "versionCode": 2440
     },
     "plugins": [
       "expo-router",
@@ -47,6 +51,12 @@
           "microphonePermission": "Allow Offline Connect Pro to use the microphone during local calls."
         }
       ]
-    ]
+    ],
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#06182A"
+    }
   }
 }
