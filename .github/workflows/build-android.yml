@@ -5,44 +5,46 @@ on:
 
 jobs:
   android-apk:
-    name: Build installable debug APK
+    name: Build Standalone Android APK
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out project
+      - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Set up Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
 
-      - name: Install JavaScript dependencies
-        run: npm install
+      - name: Validate Expo configuration
+        run: npx expo config --type public
 
-      - name: Align Expo package versions
-        run: npx expo install --fix
-
-      - name: TypeScript validation
+      - name: Validate TypeScript
         run: npx tsc --noEmit
 
-      - name: Generate native Android project
-        run: npx expo prebuild --platform android --non-interactive
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --clean --non-interactive
 
-      - name: Build debug APK
+      - name: Build standalone release APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --stacktrace
 
-      - name: Upload APK
+      - name: Upload standalone APK
         uses: actions/upload-artifact@v4
         with:
-          name: offline-connect-pro-android-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: offline-connect-pro-standalone-apk
+          path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14
