@@ -11,7 +11,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.offlineconnectpro.app",
       "infoPlist": {
-        "NSLocalNetworkUsageDescription": "Offline Connect Pro discovers nearby phones and exchanges messages, files and calls over your local Wi-Fi network.",
+        "NSLocalNetworkUsageDescription": "Offline Connect Pro discovers nearby phones and exchanges messages, files and calls over their local Wi-Fi network.",
         "NSBonjourServices": [
           "_ocpro._tcp"
         ],
@@ -49,6 +49,12 @@
         {
           "cameraPermission": "Allow Offline Connect Pro to use the camera during local video calls.",
           "microphonePermission": "Allow Offline Connect Pro to use the microphone during local calls."
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-4105406776551148~9263229926"
         }
       ]
     ],

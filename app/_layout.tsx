@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import mobileAds from 'react-native-google-mobile-ads';
+
 import { AppProvider, useApp } from '@/state/AppContext';
 import { NetworkProvider } from '@/state/NetworkContext';
 
@@ -12,25 +14,64 @@ function StartupAnimation({ onFinish }: { onFinish: () => void }) {
 
   useEffect(() => {
     const entrance = Animated.parallel([
-      Animated.spring(scale, { toValue: 1, speed: 1.8, bounciness: 8, useNativeDriver: true }),
+      Animated.spring(scale, {
+        toValue: 1,
+        speed: 1.8,
+        bounciness: 8,
+        useNativeDriver: true,
+      }),
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.35, duration: 900, useNativeDriver: true })
-      ])
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0.35,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+      }),
     ]);
+
     entrance.start();
+
     const timer = setTimeout(() => {
-      Animated.timing(fade, { toValue: 0, duration: 420, useNativeDriver: true }).start(({ finished }) => {
+      Animated.timing(fade, {
+        toValue: 0,
+        duration: 420,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
         if (finished) onFinish();
       });
     }, 2100);
+
     return () => clearTimeout(timer);
   }, [fade, onFinish, pulse, scale]);
 
   return (
     <Animated.View style={[styles.splash, { opacity: fade }]}>
-      <Animated.View style={[styles.halo, { opacity: pulse, transform: [{ scale: scale }] }]} />
-      <Animated.Image source={require('../assets/icon.png')} resizeMode="contain" style={[styles.logo, { transform: [{ scale }] }]} />
+      <Animated.View
+        style={[
+          styles.halo,
+          {
+            opacity: pulse,
+            transform: [{ scale }],
+          },
+        ]}
+      />
+
+      <Animated.Image
+        source={require('../assets/icon.png')}
+        resizeMode="contain"
+        style={[
+          styles.logo,
+          {
+            transform: [{ scale }],
+          },
+        ]}
+      />
+
       <Text style={styles.brand}>OFFLINE CONNECT PRO</Text>
       <Text style={styles.tagline}>Connect nearby. Stay connected.</Text>
       <Text style={styles.version}>2.4.4.0</Text>
@@ -41,20 +82,49 @@ function StartupAnimation({ onFinish }: { onFinish: () => void }) {
 function RootNavigator() {
   const { theme } = useApp();
   const [showSplash, setShowSplash] = useState(true);
-  const finishStartup = useCallback(() => setShowSplash(false), []);
+
+  const finishStartup = useCallback(() => {
+    setShowSplash(false);
+  }, []);
+
   return (
     <>
       <StatusBar style={theme === 'light' ? 'dark' : 'light'} />
+
       <NetworkProvider>
         <Stack screenOptions={{ headerShown: false }} />
       </NetworkProvider>
-      {showSplash ? <StartupAnimation onFinish={finishStartup} /> : null}
+
+      {showSplash ? (
+        <StartupAnimation onFinish={finishStartup} />
+      ) : null}
     </>
   );
 }
 
+function AdsInitializer({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .then(() => {
+        console.log('AdMob initialized successfully');
+      })
+      .catch((error) => {
+        console.warn('AdMob initialization failed:', error);
+      });
+  }, []);
+
+  return children;
+}
+
 export default function RootLayout() {
-  return <AppProvider><RootNavigator /></AppProvider>;
+  return (
+    <AppProvider>
+      <AdsInitializer>
+        <RootNavigator />
+      </AdsInitializer>
+    </AppProvider>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -64,7 +134,7 @@ const styles = StyleSheet.create({
     elevation: 999,
     backgroundColor: '#06182A',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   halo: {
     position: 'absolute',
@@ -73,10 +143,30 @@ const styles = StyleSheet.create({
     borderRadius: 135,
     borderWidth: 2,
     borderColor: '#35DCC5',
-    backgroundColor: 'rgba(32, 157, 180, 0.08)'
+    backgroundColor: 'rgba(32, 157, 180, 0.08)',
   },
-  logo: { width: 220, height: 220, borderRadius: 38 },
-  brand: { color: '#F1FFFF', fontSize: 19, fontWeight: '900', letterSpacing: 2, marginTop: 28 },
-  tagline: { color: '#9BC8D1', fontSize: 12, marginTop: 9, letterSpacing: 0.5 },
-  version: { color: '#5F9CA8', fontSize: 11, marginTop: 22, letterSpacing: 1 }
+  logo: {
+    width: 220,
+    height: 220,
+    borderRadius: 38,
+  },
+  brand: {
+    color: '#F1FFFF',
+    fontSize: 19,
+    fontWeight: '900',
+    letterSpacing: 2,
+    marginTop: 28,
+  },
+  tagline: {
+    color: '#9BC8D1',
+    fontSize: 12,
+    marginTop: 9,
+    letterSpacing: 0.5,
+  },
+  version: {
+    color: '#5F9CA8',
+    fontSize: 11,
+    marginTop: 22,
+    letterSpacing: 1,
+  },
 });
