@@ -4,6 +4,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { RTCView } from 'react-native-webrtc';
 import { Ionicons } from '@expo/vector-icons';
 import { callService } from '@/services/CallService';
+import { maybeShowInterstitial } from '@/services/Ads';
 
 type CallStatus = 'starting' | 'incoming' | 'preparing' | 'ringing' | 'connecting' | 'connected' | 'reconnecting' | 'failed' | 'ended';
 
@@ -79,8 +80,10 @@ export default function CallScreen() {
   };
 
   const endCall = () => {
+    const wasConnected = status === 'connected';
     callService.end();
     router.back();
+    if (wasConnected) setTimeout(maybeShowInterstitial, 600);
   };
 
   const statusText: Record<CallStatus, string> = {
