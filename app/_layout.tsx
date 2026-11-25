@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import mobileAds from 'react-native-google-mobile-ads';
 
 import { AppProvider, useApp } from '@/state/AppContext';
 import { NetworkProvider } from '@/state/NetworkContext';
+import { startAds } from '@/services/Ads';
 
 function StartupAnimation({ onFinish }: { onFinish: () => void }) {
   const fade = useRef(new Animated.Value(1)).current;
@@ -31,7 +31,7 @@ function StartupAnimation({ onFinish }: { onFinish: () => void }) {
           duration: 900,
           useNativeDriver: true,
         }),
-      }),
+      ]),
     ]);
 
     entrance.start();
@@ -104,14 +104,7 @@ function RootNavigator() {
 
 function AdsInitializer({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    mobileAds()
-      .initialize()
-      .then(() => {
-        console.log('AdMob initialized successfully');
-      })
-      .catch((error) => {
-        console.warn('AdMob initialization failed:', error);
-      });
+    startAds();
   }, []);
 
   return children;
