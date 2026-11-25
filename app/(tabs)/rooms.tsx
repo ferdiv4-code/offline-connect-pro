@@ -6,6 +6,7 @@ import { Screen } from '@/components/Screen';
 import { ActionButton,Card,Heading } from '@/components/UI';
 import { useApp } from '@/state/AppContext';
 import { useNetwork } from '@/state/NetworkContext';
+import AdBanner from '@/components/AdBanner';
 export default function RoomsScreen(){
  const {colors,profile}=useApp();const net=useNetwork();
  return <Screen><Heading title="Rooms" subtitle="Host a room or join a nearby group."/>
@@ -14,5 +15,6 @@ export default function RoomsScreen(){
  {net.members.filter(m=>m.id!==profile.id).map(m=><Pressable key={m.id} onPress={()=>router.push({pathname:'/chat/[id]',params:{id:`dm-${m.id}`,title:m.name,peerId:m.id}})}><Text style={{color:colors.primary,fontWeight:'700',paddingVertical:7}}>Message {m.name} privately  ›</Text></Pressable>)}<ActionButton title="Open group chat" icon="chatbubbles" onPress={()=>router.push({pathname:'/chat/[id]',params:{id:net.room!.id,title:net.room!.name}})}/><ActionButton title="Leave room" icon="exit-outline" secondary onPress={net.leave}/></Card>:null}
  <Heading title="Discovered nearby" subtitle="Devices visible on the same local network."/>
  {net.peers.map(p=><Pressable key={p.id} onPress={()=>router.push({pathname:'/join-room',params:{host:p.host,code:p.roomCode}})}><Card style={{flexDirection:'row',alignItems:'center'}}><Ionicons name="wifi" color={colors.primary} size={22}/><View style={{flex:1}}><Text style={{color:colors.text,fontWeight:'800'}}>{p.roomName}</Text><Text style={{color:colors.muted,fontSize:12}}>{p.host} · {p.members}/{p.maxMembers}</Text></View><Ionicons name="chevron-forward" color={colors.muted}/></Card></Pressable>)}
- </Screen>;
+ <AdBanner />
+    </Screen>;
 }

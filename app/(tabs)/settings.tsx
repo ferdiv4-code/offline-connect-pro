@@ -1,10 +1,13 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Share, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { Card, Heading } from '@/components/UI';
 import { useApp } from '@/state/AppContext';
 import { router } from 'expo-router';
+import AdBanner from '@/components/AdBanner';
+import { openAdPrivacyOptions } from '@/services/Ads';
+import { APP_VERSION } from '@/config/ads';
 
 export default function SettingsScreen() {
   const { colors, themeMode, setThemeMode, profile } = useApp();
@@ -28,6 +31,19 @@ export default function SettingsScreen() {
       <Text style={{ color:colors.text,fontWeight:'800' }}>Privacy & connectivity</Text>
       <Text style={{ color:colors.muted,fontSize:13,lineHeight:20 }}>Messages and room discovery are designed for your local Wi-Fi or hotspot. This early source build uses a basic room-code gate; it does not yet provide end-to-end encryption or background call support.</Text>
     </Card>
-    <Text style={{ color:colors.muted,textAlign:'center',fontSize:12 }}>Offline Connect Pro · Version 2.0.0</Text>
+    <Card>
+      <Text style={{ color:colors.text,fontWeight:'800',fontSize:16 }}>More</Text>
+      {[
+        { icon:'shield-checkmark-outline', label:'Privacy policy', onPress:()=>router.push('/privacy' as never) },
+        { icon:'megaphone-outline', label:'Ad privacy choices', onPress:()=>{ openAdPrivacyOptions(); } },
+        { icon:'share-social-outline', label:'Share Offline Connect Pro', onPress:()=>{ Share.share({ message:'Chat, call and share files with people nearby without internet. Try Offline Connect Pro!' }); } },
+      ].map(r=><Pressable key={r.label} onPress={r.onPress} style={{ flexDirection:'row',alignItems:'center',paddingVertical:10,gap:12 }}>
+        <Ionicons name={r.icon as any} size={20} color={colors.primary}/>
+        <Text style={{ color:colors.text,flex:1 }}>{r.label}</Text>
+        <Ionicons name="chevron-forward" size={18} color={colors.muted}/>
+      </Pressable>)}
+    </Card>
+    <AdBanner />
+    <Text style={{ color:colors.muted,textAlign:'center',fontSize:12 }}>Offline Connect Pro · Version {APP_VERSION}</Text>
   </Screen>;
 }
