@@ -39,7 +39,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#06182A"
       },
-      "versionCode": 2441
+      "versionCode": 2442
     },
     "plugins": [
       "expo-router",
