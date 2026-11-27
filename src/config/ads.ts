@@ -36,7 +36,7 @@ export const LEVELPLAY_BANNER_UNIT_ID = 'x8gyjz70jr6emc1u';
 export const LEVELPLAY_INTERSTITIAL_UNIT_ID = 'p1b3r1ooto4exdck';
 
 /** Set to true for ONE build to open LevelPlay's test suite on start (for checking setup). */
-export const LEVELPLAY_TEST_SUITE = false;
+export const LEVELPLAY_TEST_SUITE = true;
 
 /** True only when the App Key has been filled in (otherwise LevelPlay is skipped, no crash). */
 export const LEVELPLAY_KEY_OK = /^[a-z0-9]{6,20}$/i.test(LEVELPLAY_APP_KEY);
