@@ -32,7 +32,8 @@
         "READ_MEDIA_IMAGES",
         "READ_MEDIA_VIDEO",
         "WAKE_LOCK",
-        "VIBRATE"
+        "VIBRATE",
+        "com.google.android.gms.permission.AD_ID"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",

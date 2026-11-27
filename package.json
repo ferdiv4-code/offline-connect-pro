@@ -34,7 +34,8 @@
     "react-native-reanimated": "~4.5.1",
     "react-native-worklets": "~0.10.1",
     "buffer": "^6.0.3",
-    "react-native-google-mobile-ads": "17.4.0"
+    "react-native-google-mobile-ads": "17.4.0",
+    "unity-levelplay-mediation": "9.5.0"
   },
   "devDependencies": {
     "@types/react": "~19.2.0",

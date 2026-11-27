@@ -17,7 +17,7 @@ const sections: { title: string; body: string }[] = [
   },
   {
     title: 'Advertising',
-    body: 'The app shows ads from Google AdMob. AdMob may collect your device advertising ID, IP address and general usage data to serve and measure ads. Where the law requires it, you are asked for consent, and you can change your choice any time in Settings > Ad privacy choices. See policies.google.com/technologies/ads to learn how Google uses data.',
+    body: 'The app shows ads from Unity LevelPlay and its ad partners (and may also use Google AdMob). These providers may collect your device advertising ID, IP address and general usage data to serve and measure ads. Where the law requires it, you are asked for consent, and you can change your choice any time in Settings > Ad privacy choices. See unity.com/legal/privacy-policy and policies.google.com/technologies/ads to learn how they use data.',
   },
   {
     title: 'Security note',
